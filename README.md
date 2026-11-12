@@ -15,7 +15,7 @@ Pool a dedicated GPU cluster with other teams. Every seat is a **PayPal authoriz
 [![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs&logoColor=white)](https://nextjs.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-[Live demo](#-quick-start) · [How it works](#-how-it-works) · [PayPal integration](#-paypal-integration) · [The agent](#-the-autonomous-treasurer) · [API](#-use-it-from-code)
+[Quick start](#quick-start) · [How it works](#how-it-works) · [PayPal integration](#paypal-integration) · [The agent](#the-autonomous-treasurer) · [API](#use-it-from-code)
 
 <br />
 
@@ -25,7 +25,7 @@ Pool a dedicated GPU cluster with other teams. Every seat is a **PayPal authoriz
 
 ---
 
-## 💡 Why CoPod
+## Why CoPod
 
 Dedicated inference capacity (an 8× H100 node, provisioned model throughput) costs **$1,000–$10,000+ per month** with long commitments. Solo developers and small startups can't justify it, so they live with rate-limited public APIs — while the teams that *do* rent clusters leave **50–70% of capacity idle** overnight.
 
@@ -39,18 +39,18 @@ Pooling the cluster is the obvious fix. What's missing is **trust between strang
 | OpenAI-compatible — change one base URL | Usage is backed by funds PayPal already reserved | Unused funds are released automatically |
 | Pay only for metered tokens | Off-peak discounts fill idle hours | Every agent decision is logged and explainable |
 
-## ✨ Features
+## Features
 
-- **🔐 PayPal escrow seats** — joining places a refundable authorization hold (`intent: AUTHORIZE`). Nothing is charged up front.
-- **⚡ OpenAI-compatible proxy** — `/v1/chat/completions` with per-request token metering, streaming, and `x-copod-*` billing headers.
-- **🛡️ Overdraft guardrail** — before a prompt reaches the GPU, CoPod reserves the worst-case cost and caps `max_tokens` to what the remaining hold can pay for.
-- **🤖 Autonomous Gemini treasurer** — reprices the room, throttles or pauses risky traffic, requests top-ups, verifies authorizations with PayPal, and settles members.
-- **💸 Exact partial capture** — on exit, the agent captures precisely the metered spend with `final_capture: true`; PayPal releases the rest.
-- **📊 Live escrow ledger** — AG Grid streams holds, spend, burn rate, runway, captures and releases over Server-Sent Events.
-- **🏪 Host your own pool** — anyone can list a pool (model, seats, deposit, prices, capacity) and name their PayPal account as the payee, so captures land directly with the host.
-- **🧯 Fail-safe by design** — hard limits in code, a model fallback chain, and a deterministic rules engine so money always settles correctly.
+- **PayPal escrow seats** — joining places a refundable authorization hold (`intent: AUTHORIZE`). Nothing is charged up front.
+- **OpenAI-compatible proxy** — `/v1/chat/completions` with per-request token metering, streaming, and `x-copod-*` billing headers.
+- **Overdraft guardrail** — before a prompt reaches the GPU, CoPod reserves the worst-case cost and caps `max_tokens` to what the remaining hold can pay for.
+- **Autonomous Gemini treasurer** — reprices the room, throttles or pauses risky traffic, requests top-ups, verifies authorizations with PayPal, and settles members.
+- **Exact partial capture** — on exit, the agent captures precisely the metered spend with `final_capture: true`; PayPal releases the rest.
+- **Live escrow ledger** — AG Grid streams holds, spend, burn rate, runway, captures and releases over Server-Sent Events.
+- **Host your own pool** — anyone can list a pool (model, seats, deposit, prices, capacity) and name their PayPal account as the payee, so captures land directly with the host.
+- **Fail-safe by design** — hard limits in code, a model fallback chain, and a deterministic rules engine so money always settles correctly.
 
-## 🔄 How it works
+## How it works
 
 ```mermaid
 sequenceDiagram
@@ -92,7 +92,7 @@ sequenceDiagram
 <sub>Utilization vs. agent-set price, real PayPal sandbox events, and the treasurer's reasoning feed.</sub>
 </div>
 
-## 💳 PayPal integration
+## PayPal integration
 
 CoPod uses the full authorization lifecycle, not just a checkout button.
 
@@ -110,7 +110,7 @@ CoPod uses the full authorization lifecycle, not just a checkout button.
 - **Honor-period aware** — 48-hour settlement epochs stay inside PayPal's 3-day authorization honor period.
 - **Payee-aware** — orders can name the pool host as payee, so captures land directly in the host's account.
 
-## 🤖 The autonomous treasurer
+## The autonomous treasurer
 
 The treasurer is a Gemini function-calling agent. It doesn't just apply thresholds — it reads the whole room (utilization trend, each member's burn rate, runway, hold usage, batch share) and decides which tools to call, explaining every decision.
 
@@ -128,7 +128,7 @@ The treasurer is a Gemini function-calling agent. It doesn't just apply threshol
 
 **Safety:** the model can only act through these tools; it never touches PayPal directly. If Gemini is unavailable it falls back through `gemini-3.5-flash` → `gemini-2.5-flash` → `gemini-flash-lite-latest`, then to a deterministic rules engine.
 
-## 🏗️ Architecture
+## Architecture
 
 ```mermaid
 flowchart LR
@@ -157,7 +157,7 @@ flowchart LR
     PROXY & ENGINE & AGENT --> STORE --> SSE
 ```
 
-## 🧰 Tech stack
+## Tech stack
 
 | Layer | Technology |
 | --- | --- |
@@ -170,7 +170,7 @@ flowchart LR
 | Realtime | Server-Sent Events |
 | Hosting | Render (`render.yaml` blueprint) |
 
-## 🚀 Quick start
+## Quick start
 
 **Prerequisites:** Node.js 20+, a [PayPal Developer](https://developer.paypal.com/) sandbox app, a [Gemini API key](https://aistudio.google.com/apikey), and a [Groq API key](https://console.groq.com/keys).
 
@@ -202,7 +202,7 @@ npm run dev                  # http://localhost:3000
 3. Click **Simulate peak** / **Simulate night** and watch the treasurer reprice the room.
 4. Click **Leave room & settle**. Confirm the partial capture and released balance in the **Business sandbox** account at [sandbox.paypal.com](https://www.sandbox.paypal.com/).
 
-## 🧑‍💻 Use it from code
+## Use it from code
 
 CoPod is a drop-in OpenAI endpoint — change the base URL and key.
 
@@ -229,7 +229,7 @@ print(r.copod)  # tokens, cost, remaining hold, applied max_tokens cap
 | `x-copod-granted-max-tokens` | Guardrail cap applied to this request |
 | `x-copod-price-per-m` | Input/output price per million tokens at request time |
 
-## 📁 Project structure
+## Project structure
 
 ```
 src/
@@ -249,13 +249,13 @@ src/
 └─ components/                     # Dashboard, AG Grid ledgers, charts
 ```
 
-## 🗺️ Roadmap
+## Roadmap
 
 - Host onboarding via PayPal partner referrals (verified payee accounts)
 - Real GPU backends (vLLM / provisioned throughput) behind the same metering layer
 - Multi-currency pools and PayPal Vault for recurring members
 - Agent-to-agent buying: autonomous AI clients that join and pay for pools
 
-## 📄 License
+## License
 
 [MIT](LICENSE) — built for the PayPal AI Hackathon. Sandbox only; no real funds move.
