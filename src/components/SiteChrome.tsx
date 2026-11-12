@@ -1,22 +1,17 @@
+import Image from "next/image";
 import Link from "next/link";
 
 export function Logo({ small }: { small?: boolean }) {
   return (
     <Link href="/" className="group flex items-center gap-3 focus:outline-none">
-      <div
-        className={`${small ? "h-8 w-8" : "h-10 w-10"} flex items-center justify-center rounded-xl bg-gradient-to-tr from-copod-700 via-copod-600 to-sky-400 p-0.5 shadow-md shadow-copod-600/20 transition-transform duration-200 group-hover:scale-105`}
-      >
-        <div className="flex h-full w-full items-center justify-center rounded-[10px] bg-white/10 backdrop-blur-sm">
-          <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-            />
-          </svg>
-        </div>
-      </div>
+      <Image
+        src="/logo.png"
+        alt="CoPod"
+        width={96}
+        height={96}
+        priority
+        className={`${small ? "h-9 w-9" : "h-12 w-12"} scale-125 object-contain transition-transform duration-200 group-hover:scale-[1.35]`}
+      />
       {!small && (
         <div className="flex flex-col">
           <span className="text-xl font-extrabold tracking-tight text-slate-900 transition-colors group-hover:text-copod-600">
