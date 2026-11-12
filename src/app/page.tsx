@@ -333,11 +333,17 @@ export default async function Home() {
               <p className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">Active compute rooms</p>
               <p className="mt-2 text-base text-slate-600">Zero commitment. Authorized on PayPal. Leave whenever your run is done.</p>
             </div>
-            <div className="mt-4 md:mt-0">
+            <div className="mt-4 flex items-center gap-3 md:mt-0">
               <span className="inline-flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-copod-700">
                 <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
                 {rooms.length} rooms online
               </span>
+              <Link
+                href="/pools/new"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-3.5 py-1.5 text-xs font-semibold text-white transition hover:bg-copod-600"
+              >
+                + List your pool
+              </Link>
             </div>
           </div>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">

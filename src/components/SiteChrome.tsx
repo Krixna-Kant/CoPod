@@ -28,6 +28,7 @@ const links = [
   { href: "/#how-it-works", label: "How it Works" },
   { href: "/#pools", label: "Compute Pools" },
   { href: "/#escrow", label: "Autonomous Escrow" },
+  { href: "/pools/new", label: "Host a Pool" },
   { href: "/docs", label: "Docs" },
 ];
 

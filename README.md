@@ -47,6 +47,7 @@ Pooling the cluster is the obvious fix. What's missing is **trust between strang
 - **🤖 Autonomous Gemini treasurer** — reprices the room, throttles or pauses risky traffic, requests top-ups, verifies authorizations with PayPal, and settles members.
 - **💸 Exact partial capture** — on exit, the agent captures precisely the metered spend with `final_capture: true`; PayPal releases the rest.
 - **📊 Live escrow ledger** — AG Grid streams holds, spend, burn rate, runway, captures and releases over Server-Sent Events.
+- **🏪 Host your own pool** — anyone can list a pool (model, seats, deposit, prices, capacity) and name their PayPal account as the payee, so captures land directly with the host.
 - **🧯 Fail-safe by design** — hard limits in code, a model fallback chain, and a deterministic rules engine so money always settles correctly.
 
 ## 🔄 How it works
@@ -248,7 +249,7 @@ src/
 
 ## 🗺️ Roadmap
 
-- Host-created pools with direct payee onboarding
+- Host onboarding via PayPal partner referrals (verified payee accounts)
 - Real GPU backends (vLLM / provisioned throughput) behind the same metering layer
 - Multi-currency pools and PayPal Vault for recurring members
 - Agent-to-agent buying: autonomous AI clients that join and pay for pools

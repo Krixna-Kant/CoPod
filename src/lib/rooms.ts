@@ -79,6 +79,69 @@ export function seedIfEmpty() {
   if (changed) commit();
 }
 
+export const POOL_MODELS = [
+  { model: "gpt-oss-120b", upstreamModel: "openai/gpt-oss-120b", label: "GPT-OSS 120B (MoE)" },
+  { model: "gpt-oss-20b", upstreamModel: "openai/gpt-oss-20b", label: "GPT-OSS 20B" },
+  { model: "qwen3.8-27b", upstreamModel: "qwen/qwen3.8-27b", label: "Qwen3.8 27B (reasoning)" },
+] as const;
+
+export type NewPoolInput = {
+  name: string;
+  hostName: string;
+  hostPayeeEmail?: string;
+  model: string;
+  category: string;
+  tagline?: string;
+  hardware: string;
+  monthlyCost: number;
+  maxSeats: number;
+  depositAmount: number;
+  baseInputPricePerM: number;
+  baseOutputPricePerM: number;
+  capacityTokensPerSec: number;
+};
+
+const bounded = (v: unknown, min: number, max: number, label: string) => {
+  const n = Number(v);
+  if (!Number.isFinite(n) || n < min || n > max) throw new Error(`${label} must be between ${min} and ${max}`);
+  return n;
+};
+
+export function createPool(input: NewPoolInput) {
+  const name = String(input.name ?? "").trim().slice(0, 60);
+  const hostName = String(input.hostName ?? "").trim().slice(0, 40);
+  if (name.length < 3) throw new Error("Pool name is required");
+  if (hostName.length < 2) throw new Error("Host name is required");
+  const m = POOL_MODELS.find((p) => p.model === input.model);
+  if (!m) throw new Error("Unsupported model");
+  const email = String(input.hostPayeeEmail ?? "").trim();
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error("Payee email is invalid");
+  if (Object.keys(db().rooms).length >= 40) throw new Error("Pool limit reached for this demo");
+
+  const roomId = id("room");
+  seedRoom({
+    id: roomId,
+    name,
+    hostName,
+    model: m.model,
+    upstreamModel: m.upstreamModel,
+    category: String(input.category ?? "General").trim().slice(0, 24) || "General",
+    tagline: String(input.tagline ?? "").trim().slice(0, 90) || `Shared ${m.label} capacity hosted by ${hostName}`,
+    hardware: String(input.hardware ?? "").trim().slice(0, 40) || "Provisioned GPU capacity",
+    monthlyCost: bounded(input.monthlyCost, 50, 100_000, "Monthly cost"),
+    maxSeats: Math.round(bounded(input.maxSeats, 2, 200, "Seats")),
+    depositAmount: round2(bounded(input.depositAmount, 5, 500, "Deposit")),
+    baseInputPricePerM: round2(bounded(input.baseInputPricePerM, 0.1, 100, "Input price")),
+    baseOutputPricePerM: round2(bounded(input.baseOutputPricePerM, 0.1, 300, "Output price")),
+    capacityTokensPerSec: Math.round(bounded(input.capacityTokensPerSec, 50, 20_000, "Capacity")),
+    tenants: [],
+  });
+  if (email) db().rooms[roomId].hostPayeeEmail = email;
+  notify({ roomId, level: "info", message: `Pool created by ${hostName}. Seats are escrowed with PayPal authorization holds.` });
+  commit();
+  return db().rooms[roomId];
+}
+
 function seedRoom({ tenants, ...seed }: RoomSeed) {
   const s = db();
   const room: Room = {
