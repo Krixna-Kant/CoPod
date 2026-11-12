@@ -219,6 +219,8 @@ print(r.choices[0].message.content)
 print(r.copod)  # tokens, cost, remaining hold, applied max_tokens cap
 ```
 
+**Postman:** import [`postman/CoPod.postman_collection.json`](postman/CoPod.postman_collection.json) to run the whole lifecycle — create pool → join → PayPal AUTHORIZE order → metered chat → agent review → leave & settle. Test scripts chain `roomId`, `memberId`, `orderId` and `apiKey` automatically.
+
 | Header | Meaning |
 | --- | --- |
 | `x-copod-priority: batch` | Mark traffic as batch (eligible for off-peak pricing; paused first at peak) |

@@ -1,0 +1,151 @@
+{
+  "info": {
+    "name": "CoPod API",
+    "description": "Fractional AI compute escrow on PayPal.\n\nFlow: create or pick a pool -> join -> create PayPal AUTHORIZE order -> approve in the UI (sandbox buyer) -> call the metered OpenAI-compatible proxy with your API key -> let the Gemini treasurer act -> leave and settle by partial capture.\n\nSet `baseUrl` to http://localhost:3000 or your Render URL. `memberId` is saved automatically by the Join request; copy `apiKey` from the room dashboard after PayPal approval.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "roomId", "value": "room_gptoss120b" },
+    { "key": "memberId", "value": "" },
+    { "key": "orderId", "value": "" },
+    { "key": "apiKey", "value": "cp_live_paste_from_dashboard" }
+  ],
+  "item": [
+    {
+      "name": "1. Pools",
+      "item": [
+        {
+          "name": "Create pool (host)",
+          "event": [{ "listen": "test", "script": { "exec": ["const j = pm.response.json();", "if (j.roomId) pm.collectionVariables.set('roomId', j.roomId);", "pm.test('pool created', () => pm.expect(j.roomId).to.match(/^room_/));"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/rooms",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Night-shift H100 Pool\",\n  \"hostName\": \"Acme Compute\",\n  \"hostPayeeEmail\": \"\",\n  \"model\": \"gpt-oss-120b\",\n  \"category\": \"High Throughput\",\n  \"hardware\": \"8x H100 80GB\",\n  \"monthlyCost\": 1200,\n  \"maxSeats\": 24,\n  \"depositAmount\": 50,\n  \"baseInputPricePerM\": 10,\n  \"baseOutputPricePerM\": 30,\n  \"capacityTokensPerSec\": 1500\n}"
+            },
+            "description": "Lists a new compute pool. `model` is one of gpt-oss-120b, gpt-oss-20b, qwen3.8-27b. `hostPayeeEmail` (optional) is the PayPal Business account that receives captures."
+          }
+        },
+        {
+          "name": "Room state (ledger, prices, agent decisions)",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/rooms/{{roomId}}/state" }
+        }
+      ]
+    },
+    {
+      "name": "2. Join with a PayPal hold",
+      "item": [
+        {
+          "name": "Join room",
+          "event": [{ "listen": "test", "script": { "exec": ["const j = pm.response.json();", "if (j.memberId) pm.collectionVariables.set('memberId', j.memberId);", "pm.test('member created', () => pm.expect(j.memberId).to.match(/^mem_/));"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/rooms/{{roomId}}/join",
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Postman Test Co\"\n}" }
+          }
+        },
+        {
+          "name": "Create PayPal AUTHORIZE order (deposit)",
+          "event": [{ "listen": "test", "script": { "exec": ["const j = pm.response.json();", "if (j.orderId) pm.collectionVariables.set('orderId', j.orderId);", "pm.test('order created', () => pm.expect(j.orderId).to.be.a('string'));"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/paypal/orders",
+            "body": { "mode": "raw", "raw": "{\n  \"memberId\": \"{{memberId}}\",\n  \"kind\": \"deposit\"\n}" },
+            "description": "Calls PayPal POST /v2/checkout/orders with intent AUTHORIZE. The buyer approves it in the PayPal popup on the room page; then the server calls /authorize and issues the API key."
+          }
+        },
+        {
+          "name": "Authorize approved order",
+          "event": [{ "listen": "test", "script": { "exec": ["const j = pm.response.json();", "if (j.apiKey) pm.collectionVariables.set('apiKey', j.apiKey);", "pm.test('hold authorized', () => pm.expect(j.authorizationId).to.be.a('string'));"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/paypal/orders/{{orderId}}/authorize",
+            "body": { "mode": "raw", "raw": "{\n  \"memberId\": \"{{memberId}}\"\n}" },
+            "description": "Only succeeds after the buyer has approved the order. Calls PayPal POST /v2/checkout/orders/{id}/authorize."
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Metered proxy (OpenAI-compatible)",
+      "item": [
+        {
+          "name": "List models",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{apiKey}}" }], "url": "{{baseUrl}}/v1/models" }
+        },
+        {
+          "name": "Chat completion (interactive)",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('metered', () => pm.expect(pm.response.headers.get('x-copod-cost-usd')).to.exist);", "console.log('remaining hold', pm.response.headers.get('x-copod-remaining-usd'), 'granted max_tokens', pm.response.headers.get('x-copod-granted-max-tokens'));"] } }],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{apiKey}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{baseUrl}}/v1/chat/completions",
+            "body": { "mode": "raw", "raw": "{\n  \"model\": \"gpt-oss-120b\",\n  \"max_tokens\": 300,\n  \"messages\": [{ \"role\": \"user\", \"content\": \"Explain a PayPal authorization hold in two sentences.\" }]\n}" },
+            "description": "Every request is metered against the member's PayPal hold. Response headers: x-copod-cost-usd, x-copod-remaining-usd, x-copod-granted-max-tokens, x-copod-price-per-m."
+          }
+        },
+        {
+          "name": "Chat completion (batch, guardrail test)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{apiKey}}" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-copod-priority", "value": "batch" }
+            ],
+            "url": "{{baseUrl}}/v1/chat/completions",
+            "body": { "mode": "raw", "raw": "{\n  \"model\": \"gpt-oss-120b\",\n  \"max_tokens\": 100000,\n  \"messages\": [{ \"role\": \"user\", \"content\": \"Classify: 'refund not received'\" }]\n}" },
+            "description": "Asks for far more tokens than the hold can pay for. Check x-copod-granted-max-tokens to see the guardrail cap."
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Autonomous treasurer",
+      "item": [
+        {
+          "name": "Simulate peak load",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/rooms/{{roomId}}/sim",
+            "body": { "mode": "raw", "raw": "{\n  \"mode\": \"peak\"\n}" },
+            "description": "mode: auto | offpeak | peak. The agent reacts to sustained utilization outside the 30-85% band."
+          }
+        },
+        {
+          "name": "Run agent review now",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/rooms/{{roomId}}/agent",
+            "body": { "mode": "raw", "raw": "{}" },
+            "description": "Runs the Gemini treasurer. Returns its summary plus every tool call (set_room_price, set_member_policy, request_top_up, settle_member, ...) and result."
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Settle",
+      "item": [
+        {
+          "name": "Leave room (partial capture + release)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/members/{{memberId}}/leave",
+            "description": "The treasurer captures exactly the metered spend with final_capture: true (POST /v2/payments/authorizations/{id}/capture); PayPal releases the remainder of the hold."
+          }
+        }
+      ]
+    }
+  ]
+}
