@@ -107,15 +107,16 @@ export function commit() {
     }, 150);
   }
   if (!rt.saveTimer) {
-    rt.saveTimer = setTimeout(() => {
-      rt.saveTimer = undefined;
+    rt.saveTimer = setTimeout(async () => {
       try {
-        fs.mkdirSync(path.dirname(DATA_FILE), { recursive: true });
-        fs.writeFileSync(DATA_FILE, JSON.stringify(rt.state));
+        await fs.promises.mkdir(path.dirname(DATA_FILE), { recursive: true });
+        await fs.promises.writeFile(DATA_FILE, JSON.stringify(rt.state));
       } catch (err) {
         console.error("[store] save failed", err);
+      } finally {
+        rt.saveTimer = undefined;
       }
-    }, 1000);
+    }, 10_000);
   }
 }
 
