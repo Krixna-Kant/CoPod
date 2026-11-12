@@ -54,7 +54,7 @@ export function Nav() {
             <span>PayPal Sandbox</span>
           </div>
           <Link
-            href="/rooms/room_llama70b"
+            href="/rooms/room_gptoss120b"
             className="shimmer-btn inline-flex items-center justify-center rounded-xl bg-copod-600 px-4 py-2.5 text-sm font-semibold text-white shadow-blue-glow transition-all duration-200 hover:bg-copod-700 active:scale-95"
           >
             Launch App

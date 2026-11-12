@@ -33,7 +33,14 @@ function client() {
   return key ? new GoogleGenAI({ apiKey: key }) : null;
 }
 
-export const agentModel = () => process.env.GEMINI_MODEL || "gemini-flash-latest";
+export const agentModel = () => process.env.GEMINI_MODEL || "gemini-3.5-flash";
+
+const agentModels = () => [
+  agentModel(),
+  ...(process.env.GEMINI_FALLBACK_MODELS ?? "gemini-2.5-flash,gemini-flash-lite-latest").split(",").map((m) => m.trim()),
+].filter((m, i, a) => m && a.indexOf(m) === i);
+
+const retryable = (err: unknown) => /\b(429|500|503|UNAVAILABLE|RESOURCE_EXHAUSTED|overloaded|high demand)\b/i.test(String((err as Error)?.message ?? err));
 
 export async function runAgent(roomId: string, trigger: string, leaving: string[] = []): Promise<AgentDecision> {
   const started = Date.now();
@@ -89,16 +96,30 @@ async function geminiLoop(
     },
   ];
 
+  const models = agentModels();
+  let mi = 0;
+  const generate = async () => {
+    for (;;) {
+      try {
+        return await ai.models.generateContent({
+          model: models[mi],
+          contents,
+          config: {
+            systemInstruction: SYSTEM,
+            tools: [{ functionDeclarations: declarations }],
+            temperature: 0.2,
+          },
+        });
+      } catch (err) {
+        if (!retryable(err) || mi >= models.length - 1) throw err;
+        mi += 1;
+        decision.model = models[mi];
+      }
+    }
+  };
+
   for (let step = 0; step < MAX_STEPS; step++) {
-    const res = await ai.models.generateContent({
-      model: agentModel(),
-      contents,
-      config: {
-        systemInstruction: SYSTEM,
-        tools: [{ functionDeclarations: declarations }],
-        temperature: 0.2,
-      },
-    });
+    const res = await generate();
     const calls = res.functionCalls ?? [];
     const modelContent = res.candidates?.[0]?.content;
     if (modelContent) contents.push(modelContent);

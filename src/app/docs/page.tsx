@@ -48,7 +48,7 @@ export default function Docs() {
 
 client = OpenAI(base_url="https://<your-copod-host>/v1", api_key="cp_live_...")
 r = client.chat.completions.create(
-    model="llama-3.3-70b",
+    model="gpt-oss-120b",
     messages=[{"role": "user", "content": "Hello from a shared H100 pool"}],
     max_tokens=512,
     extra_headers={"x-copod-priority": "batch"},   # optional: interactive (default) or batch

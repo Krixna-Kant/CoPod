@@ -27,7 +27,7 @@ export function provider(): Provider | null {
       name: "custom",
       baseUrl: process.env.UPSTREAM_BASE_URL,
       apiKey: process.env.UPSTREAM_API_KEY,
-      model: process.env.UPSTREAM_MODEL || "llama-3.3-70b-versatile",
+      model: process.env.UPSTREAM_MODEL || "openai/gpt-oss-120b",
     };
   }
   if (process.env.GROQ_API_KEY) {
@@ -35,7 +35,7 @@ export function provider(): Provider | null {
       name: "groq",
       baseUrl: "https://api.groq.com/openai/v1",
       apiKey: process.env.GROQ_API_KEY,
-      model: process.env.UPSTREAM_MODEL || "llama-3.3-70b-versatile",
+      model: process.env.UPSTREAM_MODEL || "openai/gpt-oss-120b",
     };
   }
   if (process.env.GEMINI_API_KEY) {
@@ -100,6 +100,10 @@ export async function complete(
   const base = provider();
   if (!base) return mockCompletion(messages, maxTokens, roomModel);
   const p = base.name === "groq" && room.upstreamModel && !process.env.UPSTREAM_MODEL ? { ...base, model: room.upstreamModel } : base;
+  if (p.name === "groq" && !p.extra) {
+    if (p.model.includes("gpt-oss")) p.extra = { reasoning_effort: "low" };
+    else if (p.model.includes("qwen")) p.extra = { reasoning_effort: "none" };
+  }
 
   const started = Date.now();
   const payload: Record<string, unknown> = {

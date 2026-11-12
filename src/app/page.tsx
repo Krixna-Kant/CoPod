@@ -54,7 +54,7 @@ export default async function Home() {
   ensureEngine();
   const s = db();
   const rooms = Object.values(s.rooms);
-  const main = s.rooms.room_llama70b ?? rooms[0];
+  const main = s.rooms.room_gptoss120b ?? rooms[0];
   const mainUtil = roomUtilization(main);
   const mainMembers = membersOf(main.id);
   const lastRequest = [...s.usage].reverse().find((u) => u.roomId === main.id && !s.members[u.memberId]?.simulated && !u.backfill);
