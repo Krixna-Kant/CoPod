@@ -94,10 +94,12 @@ export async function complete(
   body: Record<string, unknown>,
   messages: ChatMessage[],
   maxTokens: number,
-  roomModel: string,
+  room: { model: string; upstreamModel?: string },
 ): Promise<UpstreamResult> {
-  const p = provider();
-  if (!p) return mockCompletion(messages, maxTokens, roomModel);
+  const roomModel = room.model;
+  const base = provider();
+  if (!base) return mockCompletion(messages, maxTokens, roomModel);
+  const p = base.name === "groq" && room.upstreamModel && !process.env.UPSTREAM_MODEL ? { ...base, model: room.upstreamModel } : base;
 
   const started = Date.now();
   const payload: Record<string, unknown> = {

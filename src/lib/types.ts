@@ -19,6 +19,9 @@ export interface Room {
   id: string;
   name: string;
   model: string;
+  upstreamModel?: string;
+  category: string;
+  tagline: string;
   hardware: string;
   hostName: string;
   hostPayeeEmail?: string;

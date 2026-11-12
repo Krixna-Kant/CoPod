@@ -17,7 +17,7 @@ export function RoomDashboard({ roomId }: { roomId: string }) {
   const [agentBusy, setAgentBusy] = useState(false);
 
   if (!view) {
-    return <div className="flex flex-1 items-center justify-center text-muted">Connecting to room...</div>;
+    return <div className="flex flex-1 items-center justify-center text-slate-500">Connecting to room...</div>;
   }
 
   const { room, config } = view;
@@ -25,24 +25,31 @@ export function RoomDashboard({ roomId }: { roomId: string }) {
   const setMode = (mode: LoadMode) => post(`/api/rooms/${roomId}/sim`, { mode });
 
   return (
-    <div className="mx-auto w-full max-w-[1600px] space-y-4 px-4 py-5 md:px-6">
-      <header className="flex flex-wrap items-end justify-between gap-3">
+    <div className="mx-auto w-full max-w-[1600px] space-y-5 px-4 py-7 md:px-6">
+      <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <Link href="/" className="text-xs text-muted hover:text-foreground">
-            CoPod
-          </Link>
-          <h1 className="text-2xl font-semibold tracking-tight">{room.name}</h1>
-          <p className="text-sm text-muted">
+          <div className="mb-2 flex items-center gap-2 text-xs font-medium text-slate-500">
+            <Link href="/#pools" className="hover:text-copod-600">
+              Compute pools
+            </Link>
+            <span>/</span>
+            <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-copod-800">{room.category}</span>
+          </div>
+          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">{room.name}</h1>
+          <p className="mt-1 text-sm text-slate-500">
             {room.hardware} - hosted by {room.hostName} - {room.epochHours}h settlement epochs
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2 text-[11px]">
-          <span className={`rounded-full px-2 py-1 ring-1 ${connected ? "text-emerald-300 ring-emerald-500/30" : "text-red-300 ring-red-500/30"}`}>
+        <div className="flex flex-wrap items-center gap-2 font-mono text-[11px]">
+          <span
+            className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 ${connected ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-red-200 bg-red-50 text-red-700"}`}
+          >
+            <span className={`h-1.5 w-1.5 rounded-full ${connected ? "animate-pulse bg-emerald-500" : "bg-red-500"}`} />
             {connected ? "live" : "reconnecting"}
           </span>
-          <span className="rounded-full px-2 py-1 text-slate-300 ring-1 ring-line">PayPal: {config.paypalMode}</span>
-          <span className="rounded-full px-2 py-1 text-slate-300 ring-1 ring-line">Agent: {config.agent}</span>
-          <span className="rounded-full px-2 py-1 text-slate-300 ring-1 ring-line">Upstream: {config.upstream}</span>
+          <span className="rounded-md border border-slate-200 bg-white/70 px-2.5 py-1 text-slate-600">PayPal: {config.paypalMode}</span>
+          <span className="rounded-md border border-slate-200 bg-white/70 px-2.5 py-1 text-slate-600">Agent: {config.agent}</span>
+          <span className="rounded-md border border-slate-200 bg-white/70 px-2.5 py-1 text-slate-600">Upstream: {config.upstream}</span>
         </div>
       </header>
 
@@ -50,16 +57,16 @@ export function RoomDashboard({ roomId }: { roomId: string }) {
 
       <div className="grid gap-4 xl:grid-cols-[1fr_380px]">
         <div className="min-w-0 space-y-4">
-          <section className="panel p-3">
+          <section className="glass-card rounded-2xl p-3">
             <div className="mb-2 flex items-center justify-between px-1">
               <h2 className="text-sm font-semibold">Live escrow ledger</h2>
-              <span className="text-[11px] text-muted">every row is a PayPal authorization being metered in real time</span>
+              <span className="text-[11px] text-slate-500">every row is a PayPal authorization being metered in real time</span>
             </div>
             <LedgerGrid members={view.members} />
           </section>
 
           <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
-            <section className="panel p-3">
+            <section className="glass-card rounded-2xl p-3">
               <div className="mb-1 flex items-center justify-between px-1">
                 <h2 className="text-sm font-semibold">Utilization and dynamic price</h2>
                 <div className="flex gap-1 text-[11px]">
@@ -67,7 +74,7 @@ export function RoomDashboard({ roomId }: { roomId: string }) {
                     <button
                       key={m}
                       onClick={() => setMode(m)}
-                      className={`rounded-md px-2 py-1 ${view.sim?.mode === m ? "bg-accent text-white" : "bg-panel-2 text-muted hover:text-foreground"}`}
+                      className={`rounded-md px-2 py-1 ${view.sim?.mode === m ? "bg-copod-600 text-white" : "bg-slate-50 text-slate-500 hover:text-slate-900"}`}
                     >
                       {m === "offpeak" ? "Simulate night" : m === "peak" ? "Simulate peak" : "Auto load"}
                     </button>
@@ -76,7 +83,7 @@ export function RoomDashboard({ roomId }: { roomId: string }) {
               </div>
               <PriceChart prices={view.prices} base={room.baseOutputPricePerM} />
             </section>
-            <section className="panel p-3">
+            <section className="glass-card rounded-2xl p-3">
               <h2 className="mb-2 px-1 text-sm font-semibold">Room notices</h2>
               <ul className="scroll-thin max-h-[180px] space-y-1.5 overflow-y-auto pr-1 text-[12px]">
                 {[...view.notices].reverse().map((n) => (
@@ -87,21 +94,21 @@ export function RoomDashboard({ roomId }: { roomId: string }) {
                       }`}
                     />
                     <span className="flex-1">{n.message}</span>
-                    <span className="shrink-0 text-muted">{ago(n.at, view.now)}</span>
+                    <span className="shrink-0 text-slate-500">{ago(n.at, view.now)}</span>
                   </li>
                 ))}
-                {!view.notices.length && <li className="text-muted">No notices yet.</li>}
+                {!view.notices.length && <li className="text-slate-500">No notices yet.</li>}
               </ul>
             </section>
           </div>
 
-          <section className="panel p-3">
+          <section className="glass-card rounded-2xl p-3">
             <div className="mb-2 flex items-center gap-1 px-1 text-sm">
               {(["payments", "requests"] as const).map((t) => (
                 <button
                   key={t}
                   onClick={() => setTab(t)}
-                  className={`rounded-md px-2.5 py-1 font-semibold ${tab === t ? "bg-panel-2 text-foreground" : "text-muted"}`}
+                  className={`rounded-md px-2.5 py-1 font-semibold ${tab === t ? "bg-slate-50 text-slate-900" : "text-slate-500"}`}
                 >
                   {t === "payments" ? "PayPal payment events" : "Metered requests (guardrail log)"}
                 </button>
@@ -113,7 +120,7 @@ export function RoomDashboard({ roomId }: { roomId: string }) {
 
         <aside className="space-y-4">
           <MemberPanel view={view} />
-          <section className="panel p-3">
+          <section className="glass-card rounded-2xl p-3">
             <div className="mb-2 flex items-center justify-between px-1">
               <h2 className="text-sm font-semibold">Autonomous treasurer</h2>
               <button
@@ -126,7 +133,7 @@ export function RoomDashboard({ roomId }: { roomId: string }) {
                     setAgentBusy(false);
                   }
                 }}
-                className="rounded-md bg-panel-2 px-2 py-1 text-[11px] text-muted hover:text-foreground disabled:opacity-60"
+                className="rounded-md bg-slate-50 px-2 py-1 text-[11px] text-slate-500 hover:text-slate-900 disabled:opacity-60"
               >
                 {agentBusy ? "Thinking..." : "Run review now"}
               </button>

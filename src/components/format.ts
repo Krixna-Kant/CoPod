@@ -17,11 +17,11 @@ export const clock = (t: number) =>
   new Date(t).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
 
 export const statusColor: Record<string, string> = {
-  active: "bg-emerald-500/15 text-emerald-300 ring-emerald-500/30",
-  throttled: "bg-amber-500/15 text-amber-300 ring-amber-500/30",
-  batch_paused: "bg-orange-500/15 text-orange-300 ring-orange-500/30",
-  suspended: "bg-red-500/15 text-red-300 ring-red-500/30",
-  settling: "bg-sky-500/15 text-sky-300 ring-sky-500/30",
-  settled: "bg-slate-500/15 text-slate-300 ring-slate-500/30",
-  pending_authorization: "bg-slate-500/15 text-slate-300 ring-slate-500/30",
+  active: "bg-emerald-50 text-emerald-700 ring-emerald-200",
+  throttled: "bg-amber-50 text-amber-700 ring-amber-200",
+  batch_paused: "bg-orange-50 text-orange-700 ring-orange-200",
+  suspended: "bg-red-50 text-red-700 ring-red-200",
+  settling: "bg-sky-50 text-sky-700 ring-sky-200",
+  settled: "bg-slate-100 text-slate-600 ring-slate-200",
+  pending_authorization: "bg-slate-100 text-slate-600 ring-slate-200",
 };

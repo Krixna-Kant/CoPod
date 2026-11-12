@@ -217,7 +217,7 @@ function tick() {
     }
 
     const live = membersOf(room.id).some((m) => isLive(m));
-    if (r.running[room.id]) continue;
+    if (r.running[room.id] || !live) continue;
     if (triggers.length && now - (r.lastEventRun[room.id] ?? 0) > EVENT_DEBOUNCE) {
       r.lastPeriodicRun[room.id] = now;
       void requestAgentRun(room.id, triggers.join("; ")).catch((e) => console.error("[engine] agent", e));

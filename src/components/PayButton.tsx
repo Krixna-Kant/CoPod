@@ -33,7 +33,7 @@ export function PayButton({
     onAuthorized(r);
   };
 
-  if (!cfg) return <div className="h-11 animate-pulse rounded-lg bg-slate-800/60" />;
+  if (!cfg) return <div className="h-11 animate-pulse rounded-lg bg-slate-100" />;
 
   if (!cfg.paypalClientId) {
     return (
@@ -56,8 +56,8 @@ export function PayButton({
         >
           {busy ? "Authorizing..." : `Authorize $${amount.toFixed(2)} hold (mock PayPal)`}
         </button>
-        <p className="text-[11px] text-amber-300/80">PayPal credentials not configured: running in mock mode.</p>
-        {err && <p className="text-xs text-red-300">{err}</p>}
+        <p className="text-[11px] text-amber-600">PayPal credentials not configured: running in mock mode.</p>
+        {err && <p className="text-xs text-red-600">{err}</p>}
       </div>
     );
   }
@@ -82,10 +82,10 @@ export function PayButton({
           onError={(e) => setErr(String((e as { message?: string })?.message ?? e))}
         />
       </PayPalScriptProvider>
-      <p className="text-[11px] text-muted">
+      <p className="text-[11px] text-slate-500">
         PayPal {cfg.paypalMode} - intent AUTHORIZE: ${amount.toFixed(2)} is held, not charged.
       </p>
-      {err && <p className="text-xs text-red-300">{err}</p>}
+      {err && <p className="text-xs text-red-600">{err}</p>}
     </div>
   );
 }

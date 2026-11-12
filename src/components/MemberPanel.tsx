@@ -30,9 +30,9 @@ export function MemberPanel({ view }: { view: RoomView }) {
 
   if (!identity) {
     return (
-      <div className="panel p-4">
+      <div className="glass-card rounded-2xl p-4">
         <h3 className="text-sm font-semibold">Join this room</h3>
-        <p className="mt-1 text-xs text-muted">
+        <p className="mt-1 text-xs text-slate-500">
           Place a refundable {usd(view.room.depositAmount)} PayPal authorization. You only pay for the tokens you use; the rest is
           released when you leave.
         </p>
@@ -57,9 +57,9 @@ export function MemberPanel({ view }: { view: RoomView }) {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Your team or app name"
-              className="min-w-0 flex-1 rounded-lg border border-line bg-panel-2 px-3 py-2 text-sm outline-none focus:border-accent"
+              className="min-w-0 flex-1 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-copod-500"
             />
-            <button disabled={busy} className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">
+            <button disabled={busy} className="rounded-lg bg-copod-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">
               Continue
             </button>
           </form>
@@ -78,16 +78,16 @@ export function MemberPanel({ view }: { view: RoomView }) {
             />
           </div>
         )}
-        {err && <p className="mt-2 text-xs text-red-300">{err}</p>}
+        {err && <p className="mt-2 text-xs text-red-600">{err}</p>}
       </div>
     );
   }
 
   if (!me) {
     return (
-      <div className="panel p-4 text-sm">
-        <p className="text-muted">Your membership was not found in this room (the server may have been reset).</p>
-        <button onClick={reset} className="mt-2 text-accent underline">
+      <div className="glass-card rounded-2xl p-4 text-sm">
+        <p className="text-slate-500">Your membership was not found in this room (the server may have been reset).</p>
+        <button onClick={reset} className="mt-2 text-copod-600 underline">
           Join again
         </button>
       </div>
@@ -172,27 +172,27 @@ function Membership({
   if (me.status === "settled" && me.settlement) {
     const s = me.settlement;
     return (
-      <div className="panel space-y-3 p-4">
+      <div className="glass-card rounded-2xl space-y-3 p-4">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold">Settled - {me.name}</h3>
-          <span className="text-[11px] text-muted">by {s.settledBy === "agent" ? "CoPod agent" : "fallback"}</span>
+          <span className="text-[11px] text-slate-500">by {s.settledBy === "agent" ? "CoPod agent" : "fallback"}</span>
         </div>
         <div className="grid grid-cols-3 gap-2 text-center">
-          <div className="rounded-lg bg-panel-2 p-2">
-            <div className="text-[10px] uppercase text-muted">Metered</div>
+          <div className="rounded-lg bg-slate-50 p-2">
+            <div className="text-[10px] uppercase text-slate-500">Metered</div>
             <div className="num font-semibold">{usd(s.meteredSpend)}</div>
           </div>
-          <div className="rounded-lg bg-emerald-500/10 p-2">
-            <div className="text-[10px] uppercase text-muted">Captured</div>
-            <div className="num font-semibold text-emerald-300">{usd(s.captureAmount)}</div>
+          <div className="rounded-lg bg-emerald-50 p-2">
+            <div className="text-[10px] uppercase text-slate-500">Captured</div>
+            <div className="num font-semibold text-emerald-600">{usd(s.captureAmount)}</div>
           </div>
-          <div className="rounded-lg bg-panel-2 p-2">
-            <div className="text-[10px] uppercase text-muted">Released</div>
+          <div className="rounded-lg bg-slate-50 p-2">
+            <div className="text-[10px] uppercase text-slate-500">Released</div>
             <div className="num font-semibold">{usd(s.releasedAmount)}</div>
           </div>
         </div>
-        {s.receipt && <p className="whitespace-pre-wrap rounded-lg bg-panel-2 p-3 text-[12.5px] leading-relaxed">{s.receipt}</p>}
-        <div className="space-y-1 text-[11px] text-muted">
+        {s.receipt && <p className="whitespace-pre-wrap rounded-lg bg-slate-50 p-3 text-[12.5px] leading-relaxed">{s.receipt}</p>}
+        <div className="space-y-1 text-[11px] text-slate-500">
           {s.captures.map((c) => (
             <div key={c.captureId} className="num">
               capture {c.captureId} - {usd(c.amount)} ({c.status})
@@ -204,7 +204,7 @@ function Membership({
             </div>
           ))}
         </div>
-        <button onClick={onReset} className="w-full rounded-lg border border-line py-2 text-sm hover:bg-panel-2">
+        <button onClick={onReset} className="w-full rounded-lg border border-slate-200 py-2 text-sm hover:bg-slate-50">
           Join again
         </button>
       </div>
@@ -212,7 +212,7 @@ function Membership({
   }
 
   return (
-    <div className="panel space-y-3 p-4">
+    <div className="glass-card rounded-2xl space-y-3 p-4">
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-sm font-semibold">{me.name}</h3>
@@ -222,38 +222,38 @@ function Membership({
         </div>
         <div className="text-right">
           <div className="num text-lg font-semibold">{usd(me.available, 4)}</div>
-          <div className="text-[11px] text-muted">of {usd(me.hold)} hold available</div>
+          <div className="text-[11px] text-slate-500">of {usd(me.hold)} hold available</div>
         </div>
       </div>
-      <div className="h-1.5 overflow-hidden rounded bg-slate-700/60">
+      <div className="h-1.5 overflow-hidden rounded bg-slate-200">
         <div
           className={`h-full transition-all ${me.holdUsedPct >= 85 ? "bg-red-400" : me.holdUsedPct >= 60 ? "bg-amber-400" : "bg-emerald-400"}`}
           style={{ width: `${me.holdUsedPct}%` }}
         />
       </div>
-      {me.policy?.reason && <p className="text-[12px] text-amber-200/90">Agent: {me.policy.reason}</p>}
+      {me.policy?.reason && <p className="text-[12px] text-amber-700">Agent: {me.policy.reason}</p>}
 
       {me.pendingTopUp && (
-        <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3">
-          <p className="mb-2 text-[12px] text-amber-200">
+        <div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
+          <p className="mb-2 text-[12px] text-amber-700">
             Top-up requested: {usd(me.pendingTopUp.amount)} - {me.pendingTopUp.reason}
           </p>
           <PayButton memberId={me.id} kind="topup" amount={me.pendingTopUp.amount} onAuthorized={() => {}} />
         </div>
       )}
 
-      <div className="space-y-1.5 rounded-lg bg-panel-2 p-3 text-[12px]">
+      <div className="space-y-1.5 rounded-lg bg-slate-50 p-3 text-[12px]">
         <div className="flex justify-between gap-2">
-          <span className="text-muted">Base URL</span>
+          <span className="text-slate-500">Base URL</span>
           <code className="num truncate">{base}</code>
         </div>
         <div className="flex justify-between gap-2">
-          <span className="text-muted">API key</span>
+          <span className="text-slate-500">API key</span>
           <button className="num truncate text-left" onClick={() => setShowKey(!showKey)} title="click to reveal">
             {showKey ? identity.apiKey : `${identity.apiKey.slice(0, 12)}...`}
           </button>
         </div>
-        <pre className="scroll-thin mt-2 overflow-x-auto rounded bg-black/30 p-2 text-[11px] text-slate-300">{`from openai import OpenAI
+        <pre className="scroll-thin mt-2 overflow-x-auto rounded-lg bg-slate-900 p-2.5 font-mono text-[11px] text-slate-200">{`from openai import OpenAI
 client = OpenAI(base_url="${base}", api_key="${showKey ? identity.apiKey : "cp_live_..."}")
 client.chat.completions.create(model="${view.room.model}", messages=[...])`}</pre>
       </div>
@@ -263,32 +263,32 @@ client.chat.completions.create(model="${view.room.model}", messages=[...])`}</pr
           <select
             value={priority}
             onChange={(e) => setPriority(e.target.value as "interactive" | "batch")}
-            className="rounded border border-line bg-panel-2 px-2 py-1"
+            className="rounded border border-slate-200 bg-slate-50 px-2 py-1"
           >
             <option value="interactive">interactive</option>
             <option value="batch">batch</option>
           </select>
-          <label className="flex items-center gap-1 text-muted">
+          <label className="flex items-center gap-1 text-slate-500">
             max_tokens
             <input
               type="number"
               value={maxTokens}
               onChange={(e) => setMaxTokens(Number(e.target.value))}
-              className="num w-20 rounded border border-line bg-panel-2 px-2 py-1 text-foreground"
+              className="num w-20 rounded border border-slate-200 bg-slate-50 px-2 py-1 text-slate-900"
             />
           </label>
         </div>
         <button
           onClick={send}
           disabled={!!busy}
-          className="w-full rounded-lg bg-accent py-2 text-sm font-semibold text-white disabled:opacity-60"
+          className="w-full rounded-lg bg-copod-600 py-2 text-sm font-semibold text-white disabled:opacity-60"
         >
           {busy === "prompt" ? "Running on the pool..." : "Send a test prompt through the proxy"}
         </button>
         {out && (
-          <div className={`rounded-lg p-2 text-[12px] ${out.error ? "bg-red-500/10 text-red-200" : "bg-panel-2"}`}>
+          <div className={`rounded-lg p-2 text-[12px] ${out.error ? "bg-red-50 text-red-700" : "bg-slate-50"}`}>
             <p className="line-clamp-5 whitespace-pre-wrap">{out.text}</p>
-            <p className="mt-1 text-[11px] text-muted">{out.meta}</p>
+            <p className="mt-1 text-[11px] text-slate-500">{out.meta}</p>
           </div>
         )}
       </div>
@@ -297,7 +297,7 @@ client.chat.completions.create(model="${view.room.model}", messages=[...])`}</pr
         <button
           onClick={() => inject(Math.max(1, Math.round(me.available * 0.9 * 100) / 100))}
           disabled={!!busy}
-          className="flex-1 rounded-lg border border-line py-2 text-[12px] text-muted hover:bg-panel-2"
+          className="flex-1 rounded-lg border border-slate-200 py-2 text-[12px] text-slate-500 hover:bg-slate-50"
           title="Records a simulated batch workload against your hold, to demo guardrails and top-ups"
         >
           Simulate heavy batch job
@@ -305,7 +305,7 @@ client.chat.completions.create(model="${view.room.model}", messages=[...])`}</pr
         <button
           onClick={leave}
           disabled={!!busy}
-          className="flex-1 rounded-lg bg-red-500/80 py-2 text-sm font-semibold text-white hover:bg-red-500 disabled:opacity-60"
+          className="flex-1 rounded-lg bg-red-500 py-2 text-sm font-semibold text-white hover:bg-red-600 disabled:opacity-60"
         >
           {busy === "leave" ? "Agent settling..." : "Leave room & settle"}
         </button>

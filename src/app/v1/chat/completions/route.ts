@@ -32,7 +32,7 @@ export async function POST(req: Request) {
   }
 
   reserve(m, pf.reserve);
-  const up = await complete(body, messages, pf.grantedMaxTokens, room.model);
+  const up = await complete(body, messages, pf.grantedMaxTokens, room);
   const ev = record(m, room, {
     reserve: pf.reserve,
     inputTokens: up.inputTokens,

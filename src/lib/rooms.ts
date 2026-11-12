@@ -5,35 +5,98 @@ import type { Member, Room, Settlement } from "./types";
 
 const HONOR_MS = 3 * 24 * 3600_000;
 
-export function seedIfEmpty() {
-  const s = db();
-  if (Object.keys(s.rooms).length) return;
-  const room: Room = {
+type RoomSeed = Pick<
+  Room,
+  "id" | "name" | "model" | "upstreamModel" | "category" | "tagline" | "hardware" | "hostName" | "monthlyCost" | "maxSeats" | "depositAmount" | "baseInputPricePerM" | "baseOutputPricePerM" | "capacityTokensPerSec"
+> & { tenants: string[] };
+
+const SEEDS: RoomSeed[] = [
+  {
     id: "room_llama70b",
     name: "Llama-3.3-70B Dedicated Pool",
     model: "llama-3.3-70b",
+    upstreamModel: "llama-3.3-70b-versatile",
+    category: "High Throughput",
+    tagline: "Dedicated tensor-parallel 70B endpoint",
     hardware: "8x H100 80GB (provisioned)",
     hostName: "Northwind Labs",
-    hostPayeeEmail: process.env.PAYPAL_HOST_PAYEE_EMAIL || undefined,
     monthlyCost: 1200,
     maxSeats: 24,
     depositAmount: 50,
-    currency: "USD",
     baseInputPricePerM: 10,
     baseOutputPricePerM: 30,
-    inputPricePerM: 10,
-    outputPricePerM: 30,
+    capacityTokensPerSec: 1500,
+    tenants: ["Aster AI (simulated)", "Pixel Forge (simulated)"],
+  },
+  {
+    id: "room_qwen32b",
+    name: "Qwen3-32B Reasoning Pool",
+    model: "qwen3-32b",
+    upstreamModel: "qwen/qwen3-32b",
+    category: "Reasoning",
+    tagline: "Long-context reasoning for agent workloads",
+    hardware: "4x H100 80GB (provisioned)",
+    hostName: "Lattice Compute",
+    monthlyCost: 700,
+    maxSeats: 16,
+    depositAmount: 25,
+    baseInputPricePerM: 6,
+    baseOutputPricePerM: 18,
+    capacityTokensPerSec: 900,
+    tenants: [],
+  },
+  {
+    id: "room_llama8b",
+    name: "Llama-3.1-8B Batch Pool",
+    model: "llama-3.1-8b",
+    upstreamModel: "llama-3.1-8b-instant",
+    category: "Batch",
+    tagline: "Cheap overnight batch classification and extraction",
+    hardware: "2x L40S 48GB (provisioned)",
+    hostName: "Fernhill AI",
+    monthlyCost: 300,
+    maxSeats: 12,
+    depositAmount: 15,
+    baseInputPricePerM: 2,
+    baseOutputPricePerM: 5,
+    capacityTokensPerSec: 2500,
+    tenants: [],
+  },
+];
+
+export function seedIfEmpty() {
+  const s = db();
+  let changed = false;
+  for (const seed of SEEDS) {
+    const existing = s.rooms[seed.id];
+    if (existing) {
+      if (!existing.category) Object.assign(existing, { category: seed.category, tagline: seed.tagline, upstreamModel: seed.upstreamModel });
+      continue;
+    }
+    seedRoom(seed);
+    changed = true;
+  }
+  if (changed) commit();
+}
+
+function seedRoom({ tenants, ...seed }: RoomSeed) {
+  const s = db();
+  const room: Room = {
+    ...seed,
+    hostPayeeEmail: process.env.PAYPAL_HOST_PAYEE_EMAIL || undefined,
+    currency: "USD",
+    inputPricePerM: seed.baseInputPricePerM,
+    outputPricePerM: seed.baseOutputPricePerM,
     priceFloorMultiplier: 0.6,
     priceCeilingMultiplier: 1.4,
     topUpThreshold: 0.85,
     epochHours: 48,
-    capacityTokensPerSec: 1500,
     createdAt: Date.now(),
   };
   s.rooms[room.id] = room;
   s.prices[room.id] = [];
   s.sim[room.id] = { mode: "auto", syntheticTokensPerSec: 0 };
-  for (const name of ["Aster AI (simulated)", "Pixel Forge (simulated)"]) {
+  for (const name of tenants) {
     const m = newMember(room, name, undefined, true);
     m.status = "active";
     addAuthorization(m, {

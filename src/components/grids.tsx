@@ -5,7 +5,6 @@ import { AgGridReact } from "ag-grid-react";
 import {
   AllCommunityModule,
   ModuleRegistry,
-  colorSchemeDarkBlue,
   themeQuartz,
   type ColDef,
   type ICellRendererParams,
@@ -16,14 +15,16 @@ import { clock, int, statusColor, usd } from "./format";
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
-const theme = themeQuartz.withPart(colorSchemeDarkBlue).withParams({
-  backgroundColor: "#0b1222",
-  headerBackgroundColor: "#0f1830",
-  oddRowBackgroundColor: "#0d1528",
-  borderColor: "#1d2943",
-  foregroundColor: "#dbe3f3",
-  headerTextColor: "#8fa0c2",
-  accentColor: "#5b8cff",
+const theme = themeQuartz.withParams({
+  backgroundColor: "#ffffff",
+  headerBackgroundColor: "#f5f8ff",
+  oddRowBackgroundColor: "#fafcff",
+  borderColor: "#e2e8f0",
+  foregroundColor: "#0f172a",
+  headerTextColor: "#475569",
+  accentColor: "#0066ff",
+  rowHoverColor: "#eff6ff",
+  fontFamily: "var(--font-jakarta)",
   fontSize: 12.5,
   headerFontSize: 11.5,
   rowHeight: 38,
@@ -42,11 +43,11 @@ const count = (p: ValueFormatterParams) => int(p.value);
 function NameCell(p: ICellRendererParams<Member>) {
   const m = p.data;
   if (!m) return null;
-  if (p.node.rowPinned) return <span className="font-semibold text-slate-300">Room total</span>;
+  if (p.node.rowPinned) return <span className="font-semibold text-slate-700">Room total</span>;
   return (
     <span className="flex h-full items-center gap-2">
       <span className="font-medium">{m.name}</span>
-      {m.simulated && <span className="rounded bg-slate-700/60 px-1.5 py-0.5 text-[10px] leading-none text-slate-300">SIM</span>}
+      {m.simulated && <span className="rounded bg-slate-200 px-1.5 py-0.5 text-[10px] leading-none text-slate-700">SIM</span>}
     </span>
   );
 }
@@ -65,10 +66,10 @@ function HoldBar(p: ICellRendererParams<Member>) {
   const color = v >= 85 ? "bg-red-400" : v >= 60 ? "bg-amber-400" : "bg-emerald-400";
   return (
     <div className="flex h-full items-center gap-2">
-      <div className="h-1.5 w-20 overflow-hidden rounded bg-slate-700/60">
+      <div className="h-1.5 w-20 overflow-hidden rounded bg-slate-200">
         <div className={`h-full ${color} transition-all`} style={{ width: `${Math.min(100, v)}%` }} />
       </div>
-      <span className="num text-[11px] text-slate-300">{v.toFixed(1)}%</span>
+      <span className="num text-[11px] text-slate-700">{v.toFixed(1)}%</span>
     </div>
   );
 }
@@ -88,7 +89,7 @@ export function LedgerGrid({ members, onSelect }: { members: Member[]; onSelect?
         headerName: "Runway",
         width: 100,
         valueFormatter: (p) => (p.value === null || p.value === undefined ? "-" : p.value > 600 ? "> 10h" : `${p.value.toFixed(1)}m`),
-        cellClassRules: { "text-red-300": (p) => p.value !== null && p.value < 10 },
+        cellClassRules: { "text-red-600": (p) => p.value !== null && p.value < 10 },
       },
       { field: "tokensPerSec", headerName: "Tok/s", valueFormatter: count, width: 85 },
       { field: "usage.inputTokens", headerName: "Input tok", valueFormatter: count, enableCellChangeFlash: true, width: 110 },
@@ -160,12 +161,12 @@ export function LedgerGrid({ members, onSelect }: { members: Member[]; onSelect?
 }
 
 const payColor: Record<string, string> = {
-  ORDER_CREATED: "text-slate-300",
-  AUTHORIZED: "text-sky-300",
-  CAPTURED: "text-emerald-300",
-  VOIDED: "text-amber-300",
-  WEBHOOK: "text-violet-300",
-  ERROR: "text-red-300",
+  ORDER_CREATED: "text-slate-700",
+  AUTHORIZED: "text-sky-600",
+  CAPTURED: "text-emerald-600",
+  VOIDED: "text-amber-600",
+  WEBHOOK: "text-violet-600",
+  ERROR: "text-red-600",
 };
 
 export function PaymentsGrid({ payments, names }: { payments: Payment[]; names: Record<string, string> }) {
@@ -186,7 +187,7 @@ export function PaymentsGrid({ payments, names }: { payments: Payment[]; names: 
         headerName: "Rail",
         width: 100,
         valueFormatter: (p) => (p.value ? "simulated" : "PayPal API"),
-        cellClassRules: { "text-slate-500": (p) => !!p.value, "text-emerald-300": (p) => !p.value },
+        cellClassRules: { "text-slate-400": (p) => !!p.value, "text-emerald-600": (p) => !p.value },
       },
     ],
     [names],
@@ -215,9 +216,9 @@ export function RequestsGrid({ usage }: { usage: Usage[] }) {
         field: "outcome",
         width: 130,
         cellClassRules: {
-          "text-emerald-300": (p) => p.value === "ok",
-          "text-amber-300": (p) => p.value === "capped",
-          "text-red-300": (p) => p.value === "rejected" || p.value === "upstream_error",
+          "text-emerald-600": (p) => p.value === "ok",
+          "text-amber-600": (p) => p.value === "capped",
+          "text-red-600": (p) => p.value === "rejected" || p.value === "upstream_error",
         },
       },
       { field: "inputTokens", headerName: "In", valueFormatter: count, width: 85 },

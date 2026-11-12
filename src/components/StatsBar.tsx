@@ -5,10 +5,10 @@ import { usd } from "./format";
 
 function Stat({ label, value, sub, tone }: { label: string; value: string; sub?: string; tone?: string }) {
   return (
-    <div className="panel px-4 py-3">
-      <div className="text-[11px] uppercase tracking-wider text-muted">{label}</div>
+    <div className="glass-card rounded-2xl px-4 py-3">
+      <div className="text-[11px] uppercase tracking-wider text-slate-500">{label}</div>
       <div className={`num mt-1 text-xl font-semibold ${tone ?? ""}`}>{value}</div>
-      {sub && <div className="mt-0.5 text-[11px] text-muted">{sub}</div>}
+      {sub && <div className="mt-0.5 text-[11px] text-slate-500">{sub}</div>}
     </div>
   );
 }
@@ -29,17 +29,17 @@ export function StatsBar({ view }: { view: RoomView }) {
         label="Price / 1M tokens"
         value={`$${room.inputPricePerM.toFixed(2)} / $${room.outputPricePerM.toFixed(2)}`}
         sub={change === 0 ? "base price (in / out)" : `${change > 0 ? "+" : ""}${change}% vs base`}
-        tone={change < 0 ? "text-emerald-300" : change > 0 ? "text-amber-300" : ""}
+        tone={change < 0 ? "text-emerald-600" : change > 0 ? "text-amber-600" : ""}
       />
       <Stat
         label="Cluster utilization"
         value={`${util}%`}
         sub={util < 30 ? "idle - discount zone" : util > 85 ? "congested - peak zone" : "healthy band"}
-        tone={util < 30 ? "text-emerald-300" : util > 85 ? "text-red-300" : ""}
+        tone={util < 30 ? "text-emerald-600" : util > 85 ? "text-red-600" : ""}
       />
       <Stat label="Seats" value={`${live.length} / ${room.maxSeats}`} sub={`${usd(room.monthlyCost, 0)}/mo pool`} />
       <Stat label="PayPal holds (escrow)" value={usd(held)} sub={`${usd(metered, 4)} metered, uncaptured`} />
-      <Stat label="Captured to host" value={usd(captured)} tone="text-emerald-300" sub="final partial captures" />
+      <Stat label="Captured to host" value={usd(captured)} tone="text-emerald-600" sub="final partial captures" />
       <Stat label="Released to payers" value={usd(released)} sub="unused holds returned" />
     </div>
   );
