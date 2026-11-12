@@ -110,7 +110,9 @@ export function commit() {
     rt.saveTimer = setTimeout(async () => {
       try {
         await fs.promises.mkdir(path.dirname(DATA_FILE), { recursive: true });
-        await fs.promises.writeFile(DATA_FILE, JSON.stringify(rt.state));
+        const tmp = `${DATA_FILE}.tmp`;
+        await fs.promises.writeFile(tmp, JSON.stringify(rt.state));
+        await fs.promises.rename(tmp, DATA_FILE);
       } catch (err) {
         console.error("[store] save failed", err);
       } finally {
